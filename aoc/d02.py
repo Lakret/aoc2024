@@ -9,7 +9,7 @@ def parse(input: str) -> list[list[int]]:
 
 
 def get_diffs(report: list[int]) -> list[int]:
-    return [pair[1] - pair[0] for pair in pairwise(report)]
+    return [next - prev for prev, next in pairwise(report)]
 
 
 def is_safe(report: list[int]) -> bool:
