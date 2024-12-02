@@ -9,7 +9,7 @@ def parse(input: str) -> list[list[int]]:
 
 
 def get_diffs(report: list[int]) -> list[int]:
-    return list(map(lambda pair: pair[1] - pair[0], pairwise(report)))
+    return [pair[1] - pair[0] for pair in pairwise(report)]
 
 
 def is_safe(report: list[int]) -> bool:
@@ -31,7 +31,7 @@ def variants_without_one_level(report: list[int]) -> Iterator[list[int]]:
 
 
 def is_safe_p2(report: list[int]) -> bool:
-    return is_safe(report) or any(map(lambda report: is_safe(report), variants_without_one_level(report)))
+    return is_safe(report) or any(map(is_safe, variants_without_one_level(report)))
 
 
 def p2(reports: list[list[int]]) -> int:
