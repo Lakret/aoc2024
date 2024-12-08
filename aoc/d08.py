@@ -1,5 +1,4 @@
 from aoc.helpers import *
-from typing import Optional
 from dataclasses import dataclass
 from collections import defaultdict
 from itertools import combinations
@@ -23,20 +22,20 @@ class Map:
             case antennas:
                 res = set()
                 for a1, a2 in combinations(antennas, 2):
-                    res = res.union(self._antinodes_for_pair(a1, a2, max_k=None if part2 else 1))
+                    res = res.union(self._antinodes_for_pair(a1, a2, part2=part2))
                 return res
 
     def is_inside(self, c: tuple[int, int]) -> bool:
         return c[0] >= 0 and c[0] <= self.max_row and c[1] >= 0 and c[1] <= self.max_col
 
     def _antinodes_for_pair(
-        self, a1: tuple[int, int], a2: tuple[int, int], max_k: Optional[int] = None
+        self, a1: tuple[int, int], a2: tuple[int, int], part2: bool = False
     ) -> set[tuple[int, int]]:
-        res = {a1, a2} if max_k is None else set()
+        res = {a1, a2} if part2 else set()
         drow, dcol = a2[0] - a1[0], a2[1] - a1[1]
         for origin, direction in [(a1, -1), (a2, 1)]:
             k = 1
-            while max_k is None or k <= max_k:
+            while part2 or k <= 1:
                 node = (origin[0] + direction * k * drow, origin[1] + direction * k * dcol)
                 if self.is_inside(node):
                     res.add(node)
