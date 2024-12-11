@@ -27,8 +27,11 @@ def parse(input: str) -> any:
 DIRECTIONS = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
 
-def score_trailhead_reachable_summits(m: Map, coords: tuple[int, int]) -> int:
-    stack, summits = [coords], set()
+def dfs[
+    T
+](m: Map, coords: tuple[int, int], score_init: Callable[[], T], score_add: Callable[[T, tuple[int, int]], T]) -> T:
+    stack = [coords]
+    score = score_init()
     while stack:
         (row, col) = pos = stack.pop()
         for drow, dcol in DIRECTIONS:
@@ -36,33 +39,22 @@ def score_trailhead_reachable_summits(m: Map, coords: tuple[int, int]) -> int:
             new_height = m.grid.get(new_pos)
             if new_height and new_height == m.grid[pos] + 1:
                 if new_height == 9:
-                    summits.add(new_pos)
-                else:
-                    stack.append(new_pos)
-    return len(summits)
-
-
-def p1(m: Map) -> int:
-    return sum([score_trailhead_reachable_summits(m, th) for th in m.trailheads()])
-
-
-def score_trailhead_distinct_trails(m: Map, coords: tuple[int, int]) -> int:
-    stack, score = [coords], 0
-    while stack:
-        (row, col) = pos = stack.pop()
-        for drow, dcol in DIRECTIONS:
-            new_pos = (row + drow, col + dcol)
-            new_height = m.grid.get(new_pos)
-            if new_height and new_height == m.grid[pos] + 1:
-                if new_height == 9:
-                    score += 1
+                    score = score_add(score, new_pos)
                 else:
                     stack.append(new_pos)
     return score
 
 
+def p1(m: Map) -> int:
+    def score_add(score, new_pos):
+        score.add(new_pos)
+        return score
+
+    return sum([len(dfs(m, th, set, score_add)) for th in m.trailheads()])
+
+
 def p2(m: Map) -> int:
-    return sum([score_trailhead_distinct_trails(m, th) for th in m.trailheads()])
+    return sum([dfs(m, th, lambda: 0, lambda score, _: score + 1) for th in m.trailheads()])
 
 
 if __name__ == "__main__":
