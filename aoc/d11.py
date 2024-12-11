@@ -1,53 +1,41 @@
 from aoc.helpers import *
-from copy import deepcopy
+import math
 
 
 def parse(input: str) -> list[int]:
     return [int(stone) for stone in input.splitlines()[0].split()]
 
 
-def blink(stones: list[any]):
-    for pos, stone in enumerate(stones):
-        match stone:
-            case 0:
-                stones[pos] = 1
-            case int(num):
-                digits = str(num)
-                if len(digits) % 2 == 0:
-                    stones[pos] = [int(digits[: len(digits) // 2]), int(digits[len(digits) // 2 :])]
-                else:
-                    stones[pos] *= 2024
-            case list(_):
-                blink(stone)
-
-
-def deep_count(stones: list[any]) -> int:
-    res = 0
-    for stone in stones:
-        match stone:
-            case int(_):
-                res += 1
-            case list(substones):
-                res += deep_count(substones)
-    return res
+def run(stone: int, remaining_blinks: int, memo: dict[tuple[int, int], int]):
+    from_memo = memo.get((stone, remaining_blinks))
+    if from_memo:
+        return from_memo
+    elif remaining_blinks == 0:
+        return 1
+    elif stone == 0:
+        res = run(1, remaining_blinks - 1, memo)
+        memo[(stone, remaining_blinks)] = res
+        return res
+    elif math.log10(stone) >= 1.0 and math.floor(math.log10(stone)) % 2 == 1:
+        digits = str(stone)
+        first, second = int(digits[: len(digits) // 2]), int(digits[len(digits) // 2 :])
+        res = run(first, remaining_blinks - 1, memo) + run(second, remaining_blinks - 1, memo)
+        memo[(stone, remaining_blinks)] = res
+        return res
+    else:
+        res = run(stone * 2024, remaining_blinks - 1, memo)
+        memo[(stone, remaining_blinks)] = res
+        return res
 
 
 def p1(stones: list[int]) -> int:
-    stones = deepcopy(stones)
-    for _ in range(25):
-        blink(stones)
-    return deep_count(stones)
+    memo = {}
+    return sum([run(stone, 25, memo) for stone in stones])
 
 
 def p2(stones: list[int]) -> int:
-    stones = deepcopy(stones)
-    for _ in range(75):
-        blink(stones)
-    return deep_count(stones)
-
-
-# TODO: instead of io-list like approach with hybrid list, we can calculate the amount of produced stones
-# per each new stone and sum them, that should be faster because we won't need to ever build the whole list
+    memo = {}
+    return sum([run(stone, 75, memo) for stone in stones])
 
 
 if __name__ == "__main__":
@@ -57,16 +45,11 @@ if __name__ == "__main__":
     assert p1_ans == 218079
     print(f"p1: {p1_ans}")
 
-#     p2_ans = p2(input)
-#     assert p2_ans == 1722
-#     print(f"p2: {p2_ans}")
+    p2_ans = p2(input)
+    assert p2_ans == 259755538429618
+    print(f"p2: {p2_ans}")
 
 
 def test_p1():
     input = read_test_input("d11", parser=parse)
     assert p1(input) == 55312
-
-
-# def test_p2():
-#     input = read_test_input("d10", parser=parse)
-#     assert p2(input) == 81
